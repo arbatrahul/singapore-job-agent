@@ -35,10 +35,7 @@ jobs:
       - name: Run digest
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          SMTP_HOST: ${{ secrets.SMTP_HOST }}
-          SMTP_PORT: ${{ secrets.SMTP_PORT }}
-          SMTP_USER: ${{ secrets.SMTP_USER }}
-          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           DIGEST_FROM: ${{ secrets.DIGEST_FROM }}
           DIGEST_TO: ${{ secrets.DIGEST_TO }}
           LINKEDIN_RSS_URLS: ${{ secrets.LINKEDIN_RSS_URLS }}

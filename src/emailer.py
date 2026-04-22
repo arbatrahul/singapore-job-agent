@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import logging
-import smtplib
 from datetime import datetime
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 
+import httpx
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 from .config import ROOT, dry_run, env
 from .models import RankedJob
@@ -14,6 +13,8 @@ from .models import RankedJob
 log = logging.getLogger(__name__)
 
 TEMPLATES = ROOT / "src" / "templates"
+RESEND_ENDPOINT = "https://api.resend.com/emails"
+DEFAULT_FROM = "SG Jobs Digest <onboarding@resend.dev>"
 
 
 def render_digest(
@@ -36,6 +37,22 @@ def render_digest(
     )
 
 
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=8))
+def _post_resend(api_key: str, payload: dict) -> dict:
+    with httpx.Client(timeout=30.0) as client:
+        r = client.post(
+            RESEND_ENDPOINT,
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            json=payload,
+        )
+        if r.status_code >= 400:
+            raise RuntimeError(f"Resend {r.status_code}: {r.text[:300]}")
+        return r.json()
+
+
 def send(subject: str, html: str) -> None:
     if dry_run():
         out = ROOT / "out"
@@ -45,21 +62,15 @@ def send(subject: str, html: str) -> None:
         log.info("DRY_RUN: digest written to %s", path)
         return
 
-    host = env("SMTP_HOST", required=True)
-    port = int(env("SMTP_PORT", "587"))
-    user = env("SMTP_USER", required=True)
-    password = env("SMTP_PASSWORD", required=True)
-    sender = env("DIGEST_FROM", user)
+    api_key = env("RESEND_API_KEY", required=True)
+    sender = env("DIGEST_FROM", DEFAULT_FROM) or DEFAULT_FROM
     to = env("DIGEST_TO", required=True)
 
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = subject
-    msg["From"] = sender
-    msg["To"] = to
-    msg.attach(MIMEText(html, "html", "utf-8"))
-
-    with smtplib.SMTP(host, port, timeout=30) as smtp:
-        smtp.starttls()
-        smtp.login(user, password)
-        smtp.sendmail(sender, [to], msg.as_string())
-    log.info("digest sent successfully")
+    payload = {
+        "from": sender,
+        "to": [to],
+        "subject": subject,
+        "html": html,
+    }
+    resp = _post_resend(api_key, payload)
+    log.info("digest sent (resend id=%s)", resp.get("id", "?"))

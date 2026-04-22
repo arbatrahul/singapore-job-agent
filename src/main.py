@@ -88,17 +88,26 @@ def run() -> int:
     log.info("prefiltered to %d candidates", len(candidates))
 
     if not candidates:
-        log.warning("no candidates survived prefilter — sending empty digest for visibility")
-        html = render_digest([], 0, len(sources), salary_floor)
-        send(f"SG Jobs Digest — {started.strftime('%a %d %b')} (0 roles)", html)
-        return 0
+        log.error(
+            "prefilter returned 0 candidates — likely source outage or over-aggressive filter. "
+            "Not sending an empty digest. Check source fetch logs above."
+        )
+        return 1
 
     ranked = rank(candidates)
+    if not ranked:
+        log.error(
+            "ranker returned 0 results across %d candidates — every LLM batch failed. "
+            "Check ANTHROPIC_API_KEY and account balance. Not sending an empty digest.",
+            len(candidates),
+        )
+        return 1
+
     top = ranked[:TOP_N]
     log.info("ranked %d, sending top %d", len(ranked), len(top))
 
     html = render_digest(top, len(candidates), len(sources), salary_floor)
-    subject = f"SG Jobs Digest — {started.strftime('%a %d %b')} ({len(top)} roles, top {top[0].score if top else 0})"
+    subject = f"SG Jobs Digest — {started.strftime('%a %d %b')} ({len(top)} roles, top {top[0].score})"
     send(subject, html)
     log.info("digest run done in %.1fs", (datetime.now() - started).total_seconds())
     return 0
