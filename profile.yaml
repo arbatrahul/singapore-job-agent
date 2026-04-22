@@ -1,0 +1,61 @@
+name: Rahul Arbat
+location: Singapore
+years_experience: 13
+current_role: Manager, Agentic AI & GenAI — MOURI Tech
+seniority_level: Principal / Manager
+
+target_titles:
+  - Staff AI Engineer
+  - Staff Software Engineer
+  - Principal AI Engineer
+  - Principal Engineer
+  - Engineering Manager, AI
+  - Engineering Manager, GenAI
+  - Engineering Manager, Agentic AI
+  - Engineering Manager, Machine Learning
+  - Head of AI Engineering
+  - AI Architect
+  - Senior AI Engineer
+  - Senior Full Stack Engineer
+  - Senior Software Engineer
+
+role_domains:
+  strong_fit:
+    - GenAI / LLM orchestration
+    - Agentic AI / multi-agent systems
+    - RAG pipelines and retrieval systems
+    - AI platform engineering
+    - Enterprise AI architecture
+    - AI governance and responsible AI
+  good_fit:
+    - Senior full-stack (Java, Python, React, cloud)
+    - Backend platform engineering
+    - Data platform / pipelines
+    - IoT real-time streaming (AWS Kinesis / Glue)
+
+core_stack:
+  languages: [Java, Python, TypeScript, JavaScript]
+  frontend: [React]
+  llm_frameworks: [LangChain, LangGraph, LlamaIndex, custom multi-agent frameworks]
+  cloud: [AWS]
+  databases: [Oracle, PostgreSQL, MongoDB, vector DBs]
+  streaming: [Kinesis, Glue, Kafka]
+
+anti_fit:
+  # Roles/domains to down-rank or skip entirely
+  - Junior / entry-level / associate positions
+  - Pure data science / ML research (no engineering leadership)
+  - Hardware / embedded / firmware engineering
+  - Mobile-only engineering (iOS/Android native)
+  - Sales engineering / solution architect pre-sales
+  - Game development
+  - Blockchain / web3
+
+salary_floor_sgd_monthly: 8000
+
+sources:
+  - mycareersfuture
+  - nodeflair
+  - techinasia
+  - efinancialcareers
+  - linkedin_rss

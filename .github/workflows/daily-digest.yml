@@ -1,0 +1,56 @@
+name: Daily SG Jobs Digest
+
+on:
+  schedule:
+    # 00:00 UTC = 08:00 SGT
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Render to artifact instead of sending email"
+        required: false
+        default: "false"
+
+concurrency:
+  group: daily-digest
+  cancel-in-progress: false
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Run digest
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          DIGEST_FROM: ${{ secrets.DIGEST_FROM }}
+          DIGEST_TO: ${{ secrets.DIGEST_TO }}
+          LINKEDIN_RSS_URLS: ${{ secrets.LINKEDIN_RSS_URLS }}
+          EXTRA_RSS_URLS: ${{ secrets.EXTRA_RSS_URLS }}
+          DRY_RUN: ${{ github.event.inputs.dry_run == 'true' && '1' || '0' }}
+          LOG_LEVEL: INFO
+        run: python -m src.main
+
+      - name: Upload dry-run artifact
+        if: ${{ github.event.inputs.dry_run == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: digest-html
+          path: out/
+          if-no-files-found: ignore
