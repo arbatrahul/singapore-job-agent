@@ -34,11 +34,11 @@ role_domains:
     - IoT real-time streaming (AWS Kinesis / Glue)
 
 core_stack:
-  languages: [Java, Python, TypeScript, JavaScript]
+  languages: [Java, Spring Boot, Hibernate, Python, Fast API, Node JS, TypeScript, JavaScript]
   frontend: [React]
-  llm_frameworks: [LangChain, LangGraph, LlamaIndex, custom multi-agent frameworks]
-  cloud: [AWS]
-  databases: [Oracle, PostgreSQL, MongoDB, vector DBs]
+  llm_frameworks: [LangChain, LangGraph, LlamaIndex, custom multi-agent frameworks, CrewAI, Google ADK, Agno Framework]
+  cloud: [AWS, Azure, GCP]
+  databases: [Oracle, PostgreSQL, SQL Sever, MongoDB, vector DBs]
   streaming: [Kinesis, Glue, Kafka]
 
 anti_fit:
